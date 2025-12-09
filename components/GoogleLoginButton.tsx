@@ -1,6 +1,6 @@
 "use client"
 
-import { auth, googleProvider } from "@/firebase"
+import { auth, googleProvider } from "@/lib/firebase"
 import { signInWithPopup } from "firebase/auth"
 // import { useRouter } from "next/navigation"
 import { Button } from "./ui/button"
@@ -11,9 +11,9 @@ export default function GoogleLoginButton() {
     const loginWithGoogle = async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider)
-            const user =  result.user
-            const idToken  = await user.getIdToken()
-            
+            const user = result.user
+            const idToken = await user.getIdToken()
+
 
             // send the idToken to server to create secure httpOnly cookie
             const res = await fetch("/api/auth/session", {
@@ -22,11 +22,23 @@ export default function GoogleLoginButton() {
                 body: JSON.stringify({ idToken }),
             })
 
-            if(!res.ok){
+
+            if (!res.ok) {
                 const text = await res.text()
                 console.error("session creation failed", text)
                 return;
             }
+
+            // Now insert user into Neon DB
+            await fetch("/api/usersinfo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: user.displayName || "", // fallback for email-only signup
+                    email: user.email,
+                    photoURL: user.photoURL || "",
+                }),
+            });
 
             // server created session cookie — redirect to /main
 
@@ -39,7 +51,7 @@ export default function GoogleLoginButton() {
 
         }
     }
-    return(
+    return (
         <Button variant="default" onClick={loginWithGoogle}>
             Sign in With Google
         </Button>

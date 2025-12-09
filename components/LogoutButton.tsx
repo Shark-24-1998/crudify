@@ -1,22 +1,28 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import { Button } from "./ui/button";
+import { useRouter } from "next/navigation"
+import {signOut , auth} from "@/lib/firebase"
+import { Button } from "./ui/button"
 
-export default function LogoutButton() {
-  const router = useRouter();
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-  };
+export default function LogoutButton(){
+    const router = useRouter()
 
-  return (
-    <Button
-      onClick={handleLogout}
-      variant="destructive"
-    >
-      Logout
-    </Button>
-  );
+    const logOut = async()=>{
+        // 1️⃣ Remove Firebase client auth
+        await signOut(auth)
+
+        // 2️⃣ Remove server cookie
+        await fetch("/api/auth/logout", {method:"POSt"})
+        
+        // 3️⃣ Redirect
+        router.push("/register")
+        
+    }
+    return(
+        <Button variant="destructive"  onClick={logOut} >
+            Logout
+        </Button>
+    )
+
 }

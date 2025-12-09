@@ -41,9 +41,10 @@ const Home = () => {
         </Dialog>
       </div>
       <UsersTable />
-      <div>
+      <div> 
          <LogoutButton />
       </div>
+     
      
     </div>
   )

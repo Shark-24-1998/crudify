@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
         const idToken = body.idToken as string | undefined
+
         if (!idToken) {
             return new NextResponse("Missing idToken", { status: 400 })
         }
@@ -47,10 +48,12 @@ export async function POST(req: NextRequest) {
 
         return res
 
-    } catch (err: any ) {
+    } catch (err: unknown) {
         console.error("session route error:", err);
-        return new NextResponse(err?.message || "Internal error", { status: 500 });
-
+        let message = "Internal error";
+        if (err instanceof Error) message = err.message;
+        return new NextResponse(message, { status: 500 });
     }
+
 
 }
